@@ -1,9 +1,12 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { UserContext } from '../../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const { role, sidebaritem } = useContext(UserContext);
+    const [adminProfile, setAdminProfile] = useState({name: "admin"})
     const [student, setStudent] = useState({
         name: '',
         rollNo: '',
@@ -30,6 +33,20 @@ const AdminDashboard = () => {
         setStudent({ ...student, subjects: [...student.subjects, ''] });
     };
 
+    useEffect(() => {
+        fetchprofile();
+    }, [])
+
+    const fetchprofile = async () => {
+        try {
+            const res = await axios.get(`http://localhost:3000/api/admin/${sessionStorage.getItem("userId")}`);
+            if (res) setAdminProfile(res.data);
+        } catch (err) {
+            console.error("Error fetching admin profile:", err);
+            navigate('/');
+        }
+    };
+
     const handleSubmit = async () => {
         const marks = {};
         student.subjects.forEach((subj) => {
@@ -54,8 +71,6 @@ const AdminDashboard = () => {
     };
 
     const handleLogout = () => {
-        setRole("");
-        setUserId("");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("role");
         navigate('/');
@@ -72,7 +87,7 @@ const AdminDashboard = () => {
                 return <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Welcome Box */}
                     <div className="col-span-1 sm:col-span-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-6 rounded-xl shadow-md">
-                        <h2 className="text-xl font-bold mb-2">Welcome Back, Admin! 🎉</h2>
+                        <h2 className="text-xl font-bold mb-2">Welcome Back, Admin {adminProfile.name}!</h2>
                         <p className="text-sm">Manage your system efficiently using the tabs above.</p>
                     </div>
                     {/* Stats Boxes */}
@@ -163,8 +178,9 @@ const AdminDashboard = () => {
                 return <div className="bg-white border border-blue-400 p-4 rounded-lg shadow-sm">
                     <h3 className="text-blue-600 text-lg font-semibold mb-2">👤 Admin Information</h3>
                     <div className="text-sm text-gray-700 space-y-1">
-                        <p><span className="font-semibold">Name:</span> John Doe</p>
-                        <p><span className="font-semibold">Email:</span> admin@example.com</p>
+                        <p><span className="font-semibold">Admin ID:</span> {adminProfile.ID}</p>
+                        <p><span className="font-semibold">Name:</span> {adminProfile.name}</p>
+                        <p><span className="font-semibold">Email:</span>{adminProfile.email}</p>
                         <p><span className="font-semibold">Role:</span> Super Admin</p>
                     </div>
                 </div>

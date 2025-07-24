@@ -9,7 +9,7 @@ const Login = () => {
     const { setUserId, setRole } = useContext(UserContext);
     const [error, setError] = useState('');
     const [user, setUser] = useState({
-        rollNo: '',
+        UserId: '',
         password: ''
     });
 
@@ -42,7 +42,7 @@ const Login = () => {
             setError("Invalid credentials. Please try again.");
         }
         console.log("Submitted!", user);
-        setUser({ rollNo: '', password: '' })
+        setUser({ UserId: '', password: '' })
     };
 
     return (
@@ -68,8 +68,8 @@ const Login = () => {
                         {/* <label className="ml-2 mb-2">Username</label> */}
                         <input
                             type="text"
-                            name="rollNo"
-                            value={user.rollNo}
+                            name="UserId"
+                            value={user.UserId}
                             placeholder='Roll No'
                             required
                             className="text-sm border border-gray-300 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none"

@@ -1,20 +1,35 @@
 import Student from '../models/Student.js';
+import Teacher from '../models/Teacher.js';
+import Admin from '../models/Admin.js';
 import User from '../models/User.js';
 import calculateGpaAndGrade from '../utils/gpaCalculator.js';
 
 // Login Controller
 const loginUser = async (req, res) => {
   console.log("Request body:", req.body);
-  const { rollNo, password } = req.body;
+  const { UserId, password } = req.body;
   try {
-    const student = await Student.findOne({ rollNo: rollNo });
-    if (!student) return res.status(404).json({ message: 'Student not found' });
-
-    const user = await User.findOne({ password: password });
+    let user;
+    let role;
+    if (UserId.length == 5) {
+      console.log("ADMIN checking...")
+      user = await Admin.findOne({ ID: UserId, password: password });
+      role = 'admin';
+    }
+    if (UserId.length == 6) {
+      console.log("TEACHER checking...")
+      user = await Teacher.findOne({ ID: UserId, password: password });
+      role = 'teacher';
+    }
+    if (UserId.length == 12) {
+      console.log("STUDENT checking...")
+      user = await Student.findOne({ rollNo: UserId, password: password });
+      role = 'student';
+    }
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-    res.status(200).json({ role: user.role, Id: student._id });
-    console.log({ role: user.role, studentId: student._id });
+    res.status(200).json({ role: role, Id: user._id });
+    console.log({ role: role, Id: user._id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -25,7 +40,7 @@ const addStudent = async (req, res) => {
   const { name, rollNo, class: studentClass, marks } = req.body;
   const { gpa, grade } = calculateGpaAndGrade(marks);
   try {
-    const newStudent = new Student({ name, rollNo, class: studentClass, marks, gpa, grade });
+    const newStudent = new Student({ name, rollNo, password: rollNo, class: studentClass, marks, gpa, grade });
     await newStudent.save();
     res.status(201).json(newStudent);
   } catch (err) {
@@ -59,7 +74,7 @@ const getStudentById = async (req, res) => {
 // Get Single Student bu rollNo
 const getStudentByRoll = async (req, res) => {
   try {
-    const student = await Student.find({rollNo : req.params.roll});
+    const student = await Student.find({ rollNo: req.params.roll });
     if (!student) {
       return res.status(404).json({ message: "Student not found" })
     }
@@ -103,6 +118,16 @@ const deleteStudent = async (req, res) => {
   }
 };
 
+const getAdminProfile = async (req, res) => {
+ try {
+   const admin = await Admin.findById(req.params.ID);
+   if(!admin) return res.status(404).json({message: "Not found"});
+   res.status(200).json(admin);
+ } catch (err) {
+  res.status(500).json({message : "Internal Server Error!"})
+ }
+}
+
 export {
   loginUser,
   addStudent,
@@ -110,5 +135,6 @@ export {
   getStudentById,
   getStudentByRoll,
   updateStudent,
-  deleteStudent
+  deleteStudent,
+  getAdminProfile
 };
