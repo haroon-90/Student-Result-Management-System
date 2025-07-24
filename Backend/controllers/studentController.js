@@ -1,8 +1,8 @@
 import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
 import Admin from '../models/Admin.js';
-import User from '../models/User.js';
 import calculateGpaAndGrade from '../utils/gpaCalculator.js';
+import { RollerCoaster } from 'lucide-react';
 
 // Login Controller
 const loginUser = async (req, res) => {
@@ -34,6 +34,32 @@ const loginUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+const updatePassword = async (req, res) => {
+  try {
+    const { password, role } = req.body;
+    let Model;
+
+    if (role === "admin") Model = Admin;
+    else if (role === "teacher") Model = Teacher;
+    else if (role === "student") Model = Student;
+    else return res.status(400).json({ message: "Invalid role" });
+
+    const user = await Model.findByIdAndUpdate(
+      req.params.id,
+      { password },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "Password updated successfully" });
+  }
+  catch (error) {
+    res.status(500).json({ message: "Error updating password", error });
+  }
+}
 
 // Add Student (Admin/Teacher)
 const addStudent = async (req, res) => {
@@ -119,13 +145,13 @@ const deleteStudent = async (req, res) => {
 };
 
 const getAdminProfile = async (req, res) => {
- try {
-   const admin = await Admin.findById(req.params.ID);
-   if(!admin) return res.status(404).json({message: "Not found"});
-   res.status(200).json(admin);
- } catch (err) {
-  res.status(500).json({message : "Internal Server Error!"})
- }
+  try {
+    const admin = await Admin.findById(req.params.ID);
+    if (!admin) return res.status(404).json({ message: "Not found" });
+    res.status(200).json(admin);
+  } catch (err) {
+    res.status(500).json({ message: "Internal Server Error!" })
+  }
 }
 
 export {
@@ -136,5 +162,6 @@ export {
   getStudentByRoll,
   updateStudent,
   deleteStudent,
-  getAdminProfile
+  getAdminProfile,
+  updatePassword
 };

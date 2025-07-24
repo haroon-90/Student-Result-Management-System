@@ -5,8 +5,11 @@ import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { role, sidebaritem } = useContext(UserContext);
-    const [adminProfile, setAdminProfile] = useState({name: "admin"})
+    const { role, sidebaritem, setSidebaritem } = useContext(UserContext);
+    const storedId = sessionStorage.getItem("userId");
+    const [newPassword, setNewPassword] = useState('');
+    const [updated, setupdated] = useState(false);
+    const [adminProfile, setAdminProfile] = useState({ name: "admin" })
     const [student, setStudent] = useState({
         name: '',
         rollNo: '',
@@ -70,7 +73,26 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleUpdate = async () => {
+        try {
+            const res = await axios.put(`http://localhost:3000/api/student/${storedId}/password`, {
+                password: newPassword,
+                role: "admin"
+            })
+            setNewPassword('');
+            setupdated(true);
+            setTimeout(() => {
+                setupdated(false);
+            }, 3000);
+            console.log("Password updated successfully!");
+        }
+        catch (error) {
+            console.error('Failed to update password');
+        }
+    }
+
     const handleLogout = () => {
+        setSidebaritem("");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("role");
         navigate('/');
@@ -172,6 +194,41 @@ const AdminDashboard = () => {
                         >
                             Add Student
                         </button>
+                    </div>
+                );
+            case 'Update password':
+                return (
+                    <div className="bg-white flex flex-col justify-center items-center shadow-md rounded-2xl p-6 max-w-4xl mx-auto mt-8 border border-gray-200">
+                        <h3 className="text-2xl font-bold text-blue-700 mb-4 underline">Update Password</h3>
+                        <form className="space-y-4 max-w-[60%]">
+                            {updated && (
+                                <div className="bg-green-100 text-green-700 p-4 rounded-lg shadow-sm">
+                                    <p>Password updated successfully!</p>
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2">New Password</label>
+                                <input
+                                    type="password"
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter new password"
+                                />
+                            </div>
+                            <button
+                                // type="submit"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleUpdate();
+                                }}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
+                            >
+                                Update Password
+                            </button>
+                            <p className="text-sm text-gray-500 text-center mt-2">
+                                Please contact your administrator if you face any issues.
+                            </p>
+                        </form>
                     </div>
                 );
             case 'Profile':

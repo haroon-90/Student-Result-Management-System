@@ -9,6 +9,7 @@ const listItemForRole = {
     { id: 2, name: 'Profile' },
     { id: 3, name: 'Courses' },
     { id: 4, name: 'Grades' },
+    { id: 5, name: 'Update password' },
   ],
   teacher: [
     { id: 1, name: 'Home' },
@@ -16,6 +17,7 @@ const listItemForRole = {
     { id: 3, name: 'Students' },
     { id: 4, name: 'Courses' },
     { id: 5, name: 'Grades' },
+    { id: 6, name: 'Update password' },
   ],
   admin: [
     { id: 1, name: 'Home' },
@@ -23,6 +25,8 @@ const listItemForRole = {
     { id: 3, name: 'Add Student' },
     { id: 4, name: 'Courses' },
     { id: 5, name: 'Grades' },
+    { id: 6, name: 'Update password' },
+
   ],
 };
 

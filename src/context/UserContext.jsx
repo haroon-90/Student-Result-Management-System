@@ -18,6 +18,7 @@ export function UserProvider({ children }) {
 
     if (storedUserId) setUserId(storedUserId);
     if (storedRole) setRole(storedRole);
+
   }, []);
 
   return (

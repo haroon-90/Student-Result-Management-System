@@ -7,7 +7,8 @@ import {
   getStudentByRoll,
   updateStudent,
   deleteStudent,
-  getAdminProfile
+  getAdminProfile,
+  updatePassword
 } from '../controllers/studentController.js';
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.post('/login', loginUser);
 router.get('/students', getAllStudents); // Admin only
 router.post('/students', addStudent);    // Admin only
 router.get('/student/:id', getStudentById); // Admin/Student
+router.put('/student/:id/password', updatePassword)
 router.get('/student/roll/:roll', getStudentByRoll); // Admin/Student/teacher
 router.put('/student/:id', updateStudent); // Admin/teacher
 router.delete('/student/:id', deleteStudent); // Admin only

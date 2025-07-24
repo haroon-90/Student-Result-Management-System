@@ -3,10 +3,15 @@ import axios from 'axios';
 import Loading from '../Loading';
 import { UserContext } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import Toastify from 'toastify-js'
+import 'toastify-js/src/toastify.css'
 
 const TeacherDashboard2 = () => {
     const navigate = useNavigate();
-    const { sidebaritem, setUserId, setRole } = useContext(UserContext);
+    const { sidebaritem,setSidebaritem , setUserId, setRole } = useContext(UserContext);
+    const storedId = sessionStorage.getItem("userId");
+    const [newPassword, setNewPassword] = useState('');
+    const [updated, setupdated] = useState(false);
     const [rollNo, setRollNo] = useState('');
     const [student, setStudent] = useState(null);
     const [allstudent, setallstudent] = useState(null);
@@ -16,7 +21,14 @@ const TeacherDashboard2 = () => {
         try {
             setLoading(true);
             if (!rollNo.trim()) {
-                alert('Please enter a roll number');
+                // alert('Please enter a roll number');
+                Toastify({
+                    text: "Please enter a roll number",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#ff0000",
+                }).showToast();
                 setLoading(false);
                 return;
             }
@@ -45,6 +57,34 @@ const TeacherDashboard2 = () => {
         }
     };
 
+    const updateAllMarks = async () => {
+        try {
+            for (let student of allstudent) {
+                await axios.put(`http://localhost:3000/api/student/${student._id}`, {
+                    marks: student.marks,
+                });
+            }
+            // alert("Marks updated successfully!");
+            Toastify({
+                text: "Marks updated successfully!",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4CAF50",
+            }).showToast();
+        } catch (error) {
+            console.error("Error while updating marks:", error);
+            // alert("Something went wrong. Could not update all marks.");
+            Toastify({
+                text: "Something went wrong. Could not update all marks.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff0000",
+            }).showToast();
+        }
+    };
+
     const handleMarksChange = (subject, value) => {
         setStudent((prev) => ({
             ...prev,
@@ -65,18 +105,52 @@ const TeacherDashboard2 = () => {
             await axios.put(`http://localhost:3000/api/student/${student._id}`, {
                 marks: student.marks,
             });
-            alert('Marks updated successfully!');
+            // alert('Marks updated successfully!');
+            Toastify({
+                text: "Marks updated successfully!",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4CAF50",
+            }).showToast();
         } catch (err) {
             console.error('Error updating marks:', err);
-            alert('Failed to update marks');
+            // alert('Failed to update marks');
+            Toastify({
+                text: "Failed to update marks",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff0000",
+            }).showToast();
         }
     };
+
+    const handleUpdate = async () => {
+        try {
+            const res = await axios.put(`http://localhost:3000/api/student/${storedId}/password`, {
+                password: newPassword,
+                role : "teacher"
+            })
+            setNewPassword('');
+            setupdated(true);
+            setTimeout(() => {
+                setupdated(false);
+            }, 3000);
+            console.log("Password updated successfully!");
+        }
+        catch (error) {
+            console.error('Failed to update password');
+        }
+    }
 
     const handleLogout = () => {
         setRole("");
         setUserId("");
+        setSidebaritem("");
         sessionStorage.removeItem("userId");
         sessionStorage.removeItem("role");
+        sessionStorage.removeItem("sidebaritem");
         navigate('/');
     };
 
@@ -147,6 +221,42 @@ const TeacherDashboard2 = () => {
                             <p><span className="font-medium text-gray-900">Highest GPA:</span> 4.0</p>
                             <p><span className="font-medium text-gray-900">Students Failed:</span> 3</p>
                         </div>
+                    </div>
+                );
+
+            case 'Update password':
+                return (
+                    <div className="bg-white flex flex-col justify-center items-center shadow-md rounded-2xl p-6 max-w-4xl mx-auto mt-8 border border-gray-200">
+                        <h3 className="text-2xl font-bold text-blue-700 mb-4 underline">Update Password</h3>
+                        <form className="space-y-4 max-w-[60%]">
+                            {updated && (
+                                <div className="bg-green-100 text-green-700 p-4 rounded-lg shadow-sm">
+                                    <p>Password updated successfully!</p>
+                                </div>
+                            )}
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2">New Password</label>
+                                <input
+                                    type="password"
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter new password"
+                                />
+                            </div>
+                            <button
+                                // type="submit"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleUpdate();
+                                }}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
+                            >
+                                Update Password
+                            </button>
+                            <p className="text-sm text-gray-500 text-center mt-2">
+                                Please contact your administrator if you face any issues.
+                            </p>
+                        </form>
                     </div>
                 );
 
@@ -230,7 +340,7 @@ const TeacherDashboard2 = () => {
                             </button>
 
                             {allstudent && (
-                                <div className="mt-4 overflow-x-auto">
+                                <div className="mt-4 overflow-x-auto flex flex-col justify-center items-center">
                                     <h3 className="text-lg font-semibold mb-2">All Students</h3>
                                     <table className="w-full text-sm border border-blue-700 rounded-lg overflow-hidden">
                                         <thead>
@@ -270,6 +380,14 @@ const TeacherDashboard2 = () => {
                                             ))}
                                         </tbody>
                                     </table>
+                                    <div className='flex justify-end p-2 '>
+                                        <button
+                                            onClick={updateAllMarks}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+                                        >
+                                            Update
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
