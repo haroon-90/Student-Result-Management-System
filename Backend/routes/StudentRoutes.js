@@ -8,7 +8,8 @@ import {
   updateStudent,
   deleteStudent,
   getAdminProfile,
-  updatePassword
+  updatePassword,
+  getTeacherProfile
 } from '../controllers/studentController.js';
 
 const router = express.Router();
@@ -29,6 +30,7 @@ router.get('/student/roll/:roll', getStudentByRoll); // Admin/Student/teacher
 router.put('/student/:id', updateStudent); // Admin/teacher
 router.delete('/student/:id', deleteStudent); // Admin only
 
-router.get('/admin/:ID', getAdminProfile)
+router.get('/admin/:id', getAdminProfile)
+router.get('/teacher/:id', getTeacherProfile)
 
 export default router;

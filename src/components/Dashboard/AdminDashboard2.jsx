@@ -1,14 +1,17 @@
 import { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import UpdatePassword from '../Parts/UpdatePassword';
+import Logout from '../Parts/Logout';
+import Home from '../Parts/Home';
+import Profile from '../Parts/Profile';
 import { UserContext } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { role, sidebaritem, setSidebaritem } = useContext(UserContext);
-    const storedId = sessionStorage.getItem("userId");
-    const [newPassword, setNewPassword] = useState('');
-    const [updated, setupdated] = useState(false);
     const [adminProfile, setAdminProfile] = useState({ name: "admin" })
     const [student, setStudent] = useState({
         name: '',
@@ -55,47 +58,36 @@ const AdminDashboard = () => {
         student.subjects.forEach((subj) => {
             if (subj.trim()) marks[subj.trim()] = 0;
         });
-
         const newStudent = {
             name: student.name,
             rollNo: student.rollNo,
             class: student.class,
             marks,
         };
-
         try {
             await axios.post('http://localhost:3000/api/students', newStudent);
-            alert('Student added successfully!');
+            Toastify({
+                text: "Student added successfully!",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#4CAF50",
+                close: true,
+                stopOnFocus: true,
+            }).showToast();
             setStudent({ name: '', rollNo: '', class: '', subjects: [''] });
         } catch (err) {
             console.error(err);
-            alert('Error adding student.');
+            Toastify({
+                text: "Error adding student.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff4d4f",
+                close: true,
+                stopOnFocus: true,
+            }).showToast();
         }
-    };
-
-    const handleUpdate = async () => {
-        try {
-            const res = await axios.put(`http://localhost:3000/api/student/${storedId}/password`, {
-                password: newPassword,
-                role: "admin"
-            })
-            setNewPassword('');
-            setupdated(true);
-            setTimeout(() => {
-                setupdated(false);
-            }, 3000);
-            console.log("Password updated successfully!");
-        }
-        catch (error) {
-            console.error('Failed to update password');
-        }
-    }
-
-    const handleLogout = () => {
-        setSidebaritem("");
-        sessionStorage.removeItem("userId");
-        sessionStorage.removeItem("role");
-        navigate('/');
     };
 
     if (role !== 'admin') {
@@ -106,33 +98,9 @@ const AdminDashboard = () => {
         switch (sidebaritem) {
             case '':
             case 'Home':
-                return <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Welcome Box */}
-                    <div className="col-span-1 sm:col-span-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-6 rounded-xl shadow-md">
-                        <h2 className="text-xl font-bold mb-2">Welcome Back, Admin {adminProfile.name}!</h2>
-                        <p className="text-sm">Manage your system efficiently using the tabs above.</p>
-                    </div>
-                    {/* Stats Boxes */}
-                    <div className="bg-white border border-blue-400 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-blue-600 text-lg font-semibold">📚 Total Students</h3>
-                        <p className="text-2xl font-bold mt-2 text-gray-800">128</p>
-                    </div>
-
-                    <div className="bg-white border border-green-400 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-green-600 text-lg font-semibold">👨‍🏫 Total Teachers</h3>
-                        <p className="text-2xl font-bold mt-2 text-gray-800">15</p>
-                    </div>
-
-                    <div className="bg-white border border-yellow-400 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-yellow-600 text-lg font-semibold">🏫 Total Classes</h3>
-                        <p className="text-2xl font-bold mt-2 text-gray-800">8</p>
-                    </div>
-
-                    <div className="bg-white border border-red-400 p-4 rounded-lg shadow-sm">
-                        <h3 className="text-red-600 text-lg font-semibold">🛠 System Status</h3>
-                        <p className="text-2xl font-bold mt-2 text-green-600">Operational</p>
-                    </div>
-                </div>
+                return (
+                    <Home data={adminProfile} />
+                );
             case 'Add Student':
                 return (
                     <div className='flex flex-col shadow-md rounded-2xl p-6 border border-blue-200'>
@@ -198,49 +166,14 @@ const AdminDashboard = () => {
                 );
             case 'Update password':
                 return (
-                    <div className="bg-white flex flex-col justify-center items-center shadow-md rounded-2xl p-6 max-w-4xl mx-auto mt-8 border border-gray-200">
-                        <h3 className="text-2xl font-bold text-blue-700 mb-4 underline">Update Password</h3>
-                        <form className="space-y-4 max-w-[60%]">
-                            {updated && (
-                                <div className="bg-green-100 text-green-700 p-4 rounded-lg shadow-sm">
-                                    <p>Password updated successfully!</p>
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-gray-700 font-medium mb-2">New Password</label>
-                                <input
-                                    type="password"
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter new password"
-                                />
-                            </div>
-                            <button
-                                // type="submit"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleUpdate();
-                                }}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition duration-200"
-                            >
-                                Update Password
-                            </button>
-                            <p className="text-sm text-gray-500 text-center mt-2">
-                                Please contact your administrator if you face any issues.
-                            </p>
-                        </form>
-                    </div>
+                    <UpdatePassword />
                 );
             case 'Profile':
-                return <div className="bg-white border border-blue-400 p-4 rounded-lg shadow-sm">
-                    <h3 className="text-blue-600 text-lg font-semibold mb-2">👤 Admin Information</h3>
-                    <div className="text-sm text-gray-700 space-y-1">
-                        <p><span className="font-semibold">Admin ID:</span> {adminProfile.ID}</p>
-                        <p><span className="font-semibold">Name:</span> {adminProfile.name}</p>
-                        <p><span className="font-semibold">Email:</span>{adminProfile.email}</p>
-                        <p><span className="font-semibold">Role:</span> Super Admin</p>
-                    </div>
-                </div>
+                return (
+                    <Profile
+                        data={adminProfile}
+                    />
+                );
             case 'Courses':
                 return <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-md">
                     <h3 className="text-xl font-bold text-blue-600 mb-4">📘 Available Courses</h3>
@@ -307,12 +240,7 @@ const AdminDashboard = () => {
         <div className="m-4 bg-white border border-blue-700 shadow-2xl rounded-2xl min-w-[80%]">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="p-4 text-3xl font-bold rounded-tl-2xl rounded-br-2xl bg-blue-700 text-white tracking-tight">Admin Dashboard</h2>
-                <button
-                    onClick={handleLogout}
-                    className="m-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 transition text-white font-semibold rounded-full shadow-md"
-                >
-                    Log Out
-                </button>
+                <Logout />
             </div>
             <div className="pb-6 px-6">
                 {renderSection()}
