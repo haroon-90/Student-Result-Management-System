@@ -30,7 +30,7 @@ const UpdatePassword = () => {
     }
 
     return (
-        <div className="bg-white flex flex-col justify-center items-center shadow-md rounded-2xl p-6 max-w-4xl mx-auto mt-8 border border-gray-200">
+        <div className="bg-white flex flex-col justify-center items-center shadow-md rounded-2xl p-6 max-w-3xl mx-auto mt-8 border border-gray-200">
             <h3 className="text-2xl font-bold text-blue-700 mb-4 underline">Update Password</h3>
             <form className="space-y-4 max-w-[60%]">
                 {updated && (

@@ -2,13 +2,13 @@ import './App.css'
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
 import Login from './components/Login';
 import User from './components/User';
-import StudentProfile from './components/Dashboard/StudentDashboard';
+// import StudentProfile from './components/Dashboard/StudentDashboard';
 import StudentDashboard2 from './components/Dashboard/StudentDashboard2';
 
-import TeacherDashboard from './components/Dashboard/TeacherDashboard';
+// import TeacherDashboard from './components/Dashboard/TeacherDashboard';
 import TeacherDashboard2 from './components/Dashboard/TeacherDashboard2';
 
-import AdminDashboard from './components/Dashboard/AdminDashboard'
+// import AdminDashboard from './components/Dashboard/AdminDashboard'
 import AdminDashboard2 from './components/Dashboard/AdminDashboard2';
 
 import bg from './assets/bg.png'

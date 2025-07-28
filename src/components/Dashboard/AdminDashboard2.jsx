@@ -1,24 +1,36 @@
 import { useContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import UpdatePassword from '../Parts/UpdatePassword';
-import Logout from '../Parts/Logout';
-import Home from '../Parts/Home';
-import Profile from '../Parts/Profile';
 import { UserContext } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import axios from 'axios';
+
+import UpdatePassword from '../Parts/UpdatePassword';
+import Logout from '../Parts/Logout';
+import Home from '../Parts/Home';
+import Profile from '../Parts/Profile';
+import AddTeacherForm from '../Parts/AddTeacher';
+import AddCourseForm from '../Parts/AddCourse';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { role, sidebaritem, setSidebaritem } = useContext(UserContext);
-    const [adminProfile, setAdminProfile] = useState({ name: "admin" })
+    const [adminProfile, setAdminProfile] = useState({ name: "admin" });
+    const [Courses, setCourses] = useState({});
     const [student, setStudent] = useState({
         name: '',
         rollNo: '',
+        email: '',
         class: '',
         subjects: [''],
     });
+
+    const inputStyle = "text-sm border border-gray-300 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none";
+
+    const handleCoursesChange = (e) => {
+        const { name, value } = e.target;
+        setCourses({ ...Courses, [name]: value });
+    };
 
     const disabedSubmit = () => {
         if (!student.name || !student.rollNo || !student.class || student.subjects.some(subj => !subj.trim()))
@@ -101,68 +113,110 @@ const AdminDashboard = () => {
                 return (
                     <Home data={adminProfile} />
                 );
+            case 'Add Teacher':
+                return (
+                    <AddTeacherForm />
+                );
+            case 'Add Courses':
+                return (
+                    <AddCourseForm />
+                );
             case 'Add Student':
                 return (
-                    <div className='flex flex-col shadow-md rounded-2xl p-6 border border-blue-200'>
-                        <label className="font-semibold">Name:</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={student.name}
-                            onChange={handleChange}
-                            placeholder="Full Name"
-                            className="text-sm border my-2 border-gray-600 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none"
-                        />
-                        <label className="font-semibold">Roll no:</label>
-                        <input
-                            type="text"
-                            name="rollNo"
-                            value={student.rollNo}
-                            onChange={handleChange}
-                            placeholder="Roll No"
-                            className="text-sm border my-2 border-gray-600 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none"
-                        />
-                        <label className="font-semibold">Class:</label>
-                        <input
-                            type="text"
-                            name="class"
-                            value={student.class}
-                            onChange={handleChange}
-                            placeholder="Class"
-                            className="text-sm border my-2 border-gray-600 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none"
-                        />
+                    <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-xl border border-gray-200 space-y-6">
 
-                        <div className="mb-4 text-center">
-                            <div className='flex justify-between items-center mb-2'>
-                                <label className="font-semibold">Courses:</label>
+                        <div className="text-center">
+                            <h2 className="text-2xl font-bold text-blue-700">Add New Student</h2>
+                            <p className="text-sm text-gray-500 mt-1">Enter student details below</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={student.name}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Haroon Nawaz"
+                                    className={inputStyle}
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Roll Number</label>
+                                <input
+                                    type="text"
+                                    name="rollNo"
+                                    value={student.rollNo}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 23071519-032"
+                                    className={inputStyle}
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={student.email}
+                                    onChange={handleChange}
+                                    placeholder="e.g. student@lms.com"
+                                    className={inputStyle}
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium text-gray-700">Class</label>
+                                <input
+                                    type="text"
+                                    name="class"
+                                    value={student.class}
+                                    onChange={handleChange}
+                                    placeholder="e.g. BSCS-4A"
+                                    className={inputStyle}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="text-sm font-semibold text-gray-700">Courses</label>
                                 <button
                                     type="button"
                                     onClick={addSubjectField}
-                                    className="px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+                                    className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-full transition"
                                 >
                                     + Add Course
                                 </button>
                             </div>
-                            {student.subjects.map((subject, index) => (
-                                <input
-                                    key={index}
-                                    type="text"
-                                    value={subject}
-                                    onChange={(e) => handleSubjectChange(index, e.target.value)}
-                                    placeholder={`Course ${index + 1}`}
-                                    className="text-sm border my-2 border-gray-600 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none"
-                                />
-                            ))}
+
+                            <div className="space-y-2">
+                                {student.subjects.map((subject, index) => (
+                                    <input
+                                        key={index}
+                                        type="text"
+                                        value={subject}
+                                        onChange={(e) => handleSubjectChange(index, e.target.value)}
+                                        placeholder={`Course ${index + 1}`}
+                                        className={inputStyle}
+                                    />
+                                ))}
+                            </div>
                         </div>
 
-                        <button
-                            onClick={handleSubmit}
-                            disabled={disabedSubmit()}
-                            className="disabled:opacity-60 disabled:hover:bg-blue-600 px-8 py-2 mb-4 mx-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md transition-all duration-200"
-                        >
-                            Add Student
-                        </button>
+                        <div className="text-center pt-4">
+                            <button
+                                onClick={handleSubmit}
+                                disabled={disabedSubmit()}
+                                className="w-full sm:w-auto px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-lg shadow transition"
+                            >
+                                Add Student
+                            </button>
+                        </div>
                     </div>
+
                 );
             case 'Update password':
                 return (

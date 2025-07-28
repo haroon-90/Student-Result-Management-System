@@ -30,6 +30,7 @@ const TeacherDashboard2 = () => {
             const res = await axios.get(`http://localhost:3000/api/teacher/${userId}`);
             if (res) setTeacherProfile(res.data);
             console.log("Teacher Profile:", res.data);
+            console.log("Teacher Profile courses", res.data.courses);
         } catch (err) {
             console.error("Error fetching admin profile:", err);
             navigate('/');
@@ -192,7 +193,7 @@ const TeacherDashboard2 = () => {
                 return (
                     <Home
                         data={{
-                            name: "Sir Ali Raza",
+                            name: TeacherProfile.name,
                             courses: [
                                 { code: "CS-101", enrolled: 42, averageMarks: 79, status: "Active", },
                                 { code: "DSA-202", enrolled: 38, averageMarks: 85, status: "Active", },
@@ -210,34 +211,57 @@ const TeacherDashboard2 = () => {
 
             case 'Courses':
                 return (
-                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 w-full max-w-md">
-                        <div className="mb-3">
+                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 w-full mx-auto max-w-md">
+                        <div className="mb-4">
                             <h2 className="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                                <span>📘</span>
-                                Your Courses
+                                Assigned Courses
                             </h2>
+                            <p className="text-sm text-gray-500 mt-1">These are the courses assigned to you with credit hours.</p>
                         </div>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-2">
-                            <li><span className="font-medium text-gray-900">Mathematics</span> - Class 10</li>
-                            <li><span className="font-medium text-gray-900">Physics</span> - Class 9</li>
-                            <li><span className="font-medium text-gray-900">General Science</span> - Class 8</li>
-                        </ul>
+
+                        <div className="space-y-3">
+                            {TeacherProfile.courses.map(({ code, title, credit }, index) => (
+                                <div
+                                    key={index}
+                                    className="flex justify-between items-center px-4 py-3 bg-blue-50 rounded-xl shadow-sm border border-blue-100"
+                                >
+                                    <div>
+                                        <p className="font-semibold text-blue-800">{code}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-blue-800">{title}</p>
+                                    </div>
+                                    <div className="text-sm text-gray-700">
+                                        <span className="font-bold">{credit}</span> credit hour{credit > 1 ? 's' : ''}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 );
 
             case 'Grades':
                 return (
-                    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 w-full max-w-md">
-                        <div className="mb-3">
-                            <h2 className="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                                <span>📊</span>
-                                Grade Stats
+                    <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-xl font-bold text-blue-800 flex items-center gap-2">
+                                <span className="text-2xl">📊</span> Grade Overview
                             </h2>
+                            <span className="text-sm text-gray-500">Term: Fall 2025</span>
                         </div>
-                        <div className="space-y-2 text-sm text-gray-700">
-                            <p><span className="font-medium text-gray-900">Avg GPA this term:</span> 3.4</p>
-                            <p><span className="font-medium text-gray-900">Highest GPA:</span> 4.0</p>
-                            <p><span className="font-medium text-gray-900">Students Failed:</span> 3</p>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="bg-blue-50 p-4 rounded-xl shadow-sm border border-blue-100 flex flex-col items-center text-center">
+                                <span className="text-3xl font-bold text-blue-700">3.4</span>
+                                <span className="text-xs mt-1 text-gray-600">Avg GPA</span>
+                            </div>
+                            <div className="bg-green-50 p-4 rounded-xl shadow-sm border border-green-100 flex flex-col items-center text-center">
+                                <span className="text-3xl font-bold text-green-600">4.0</span>
+                                <span className="text-xs mt-1 text-gray-600">Top GPA</span>
+                            </div>
+                            <div className="bg-red-50 p-4 rounded-xl shadow-sm border border-red-100 flex flex-col items-center text-center">
+                                <span className="text-3xl font-bold text-red-600">3</span>
+                                <span className="text-xs mt-1 text-gray-600">Failed</span>
+                            </div>
                         </div>
                     </div>
                 );

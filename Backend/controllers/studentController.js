@@ -1,8 +1,8 @@
 import Student from '../models/Student.js';
 import Teacher from '../models/Teacher.js';
 import Admin from '../models/Admin.js';
+import Course from '../models/Courses.js';
 import calculateGpaAndGrade from '../utils/gpaCalculator.js';
-import { RollerCoaster } from 'lucide-react';
 
 // Login Controller
 const loginUser = async (req, res) => {
@@ -157,12 +157,44 @@ const getAdminProfile = async (req, res) => {
 const getTeacherProfile = async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.params.id);
-    if (!teacher) return res.status(404).json({ message: "Not found" });
-    res.status(200).json(teacher);
+    if (!teacher) return res.status(404).json({ message: "Teacher not found" });
+
+    const courseCodes = Array.from(teacher.courses.keys());
+
+    const matchedCourses = await Course.find({ code: { $in: courseCodes } });
+
+    res.status(200).json({
+        name: teacher.name,
+        ID: teacher.ID,
+        email: teacher.email,
+        courses: matchedCourses
+    });
+
   } catch (err) {
-    res.status(500).json({ message: "Internal Server Error!" })
+    console.error("getTeacherProfile Error:", err);
+    res.status(500).json({ message: "Internal Server Error!" });
   }
-}
+};
+
+
+const addTeacher = async (req, res) => {
+  try {
+    const { name, ID, email, password, courses } = req.body;
+    const coursesMap = new Map(Object.entries(courses));
+    const NewTeacher = new Teacher({
+      name,
+      ID,
+      email,
+      password,
+      courses: coursesMap
+    });
+    await NewTeacher.save();
+    res.status(201).json({ message: "Teacher added successfully", teacher: NewTeacher });
+  } catch (err) {
+    console.error("Teacher Add Error:", err);
+    res.status(500).json({ message: "Server Error", error: err.message });
+  }
+};
 
 export {
   loginUser,
@@ -174,5 +206,6 @@ export {
   deleteStudent,
   getAdminProfile,
   updatePassword,
-  getTeacherProfile
+  getTeacherProfile,
+  addTeacher
 };

@@ -22,10 +22,12 @@ const listItemForRole = {
   admin: [
     { id: 1, name: 'Home' },
     { id: 2, name: 'Profile' },
-    { id: 3, name: 'Add Student' },
-    { id: 4, name: 'Courses' },
-    { id: 5, name: 'Grades' },
-    { id: 6, name: 'Update password' },
+    { id: 3, name: 'Add Teacher' },
+    { id: 4, name: 'Add Student' },
+    { id: 5, name: 'Add Courses' },
+    { id: 6, name: 'Courses' },
+    { id: 7, name: 'Grades' },
+    { id: 8, name: 'Update password' },
 
   ],
 };

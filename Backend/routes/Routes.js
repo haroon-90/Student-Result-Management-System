@@ -9,8 +9,10 @@ import {
   deleteStudent,
   getAdminProfile,
   updatePassword,
-  getTeacherProfile
+  getTeacherProfile,
+  addTeacher
 } from '../controllers/studentController.js';
+import { addCourse } from '../controllers/coursesController.js';
 
 const router = express.Router();
 
@@ -30,7 +32,11 @@ router.get('/student/roll/:roll', getStudentByRoll); // Admin/Student/teacher
 router.put('/student/:id', updateStudent); // Admin/teacher
 router.delete('/student/:id', deleteStudent); // Admin only
 
+// Profile routes
 router.get('/admin/:id', getAdminProfile)
 router.get('/teacher/:id', getTeacherProfile)
+
+router.post('/courses', addCourse)
+router.post('/teacher', addTeacher)
 
 export default router;

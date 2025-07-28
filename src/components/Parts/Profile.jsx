@@ -33,13 +33,12 @@ const Profile = ({ data }) => {
                             icon={<FaChalkboardTeacher />}
                             value={
                                 <div className="flex flex-wrap gap-2 mt-2">
-                                    {data.courses &&
-                                        Object.keys(data.courses).map((courseCode, i) => (
+                                    {data.courses.map((course, i) => (
                                             <span
                                                 key={i}
                                                 className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold shadow-sm"
                                             >
-                                                {courseCode}
+                                                {course.code}
                                             </span>
                                         ))}
                                 </div>
@@ -53,7 +52,7 @@ const Profile = ({ data }) => {
                         <ProfileItem label="Name" value={data.name} icon={<FaUser />} />
                         <ProfileItem label="Admin ID" value={data.ID} icon={<FaIdBadge />} />
                         <ProfileItem label="Email" value={data.email} icon={<FaEnvelope />} />
-                        <ProfileItem label="Role" value="Super Admin" icon={<FaUserShield />} />
+                        <ProfileItem label="Role" value={data.a_role} icon={<FaUserShield />} />
                     </>
                 )}
             </div>
@@ -71,9 +70,9 @@ const ProfileItem = ({ label, value, icon }) => (
     <div className="flex flex-col justify-center items-start w-full">
       <p className="text-xs uppercase tracking-wide text-gray-500 font-medium">{label}</p>
       
-      <p className=" font-semibold text-gray-800 mt-1">
+      <div className=" font-semibold text-gray-800 mt-1">
         {value || <span className="text-gray-400 italic">N/A</span>}
-      </p>
+      </div>
     </div>
   </div>
 );

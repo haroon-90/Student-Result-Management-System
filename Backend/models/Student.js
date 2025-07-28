@@ -5,6 +5,7 @@ const student = new mongoose.Schema({
   rollNo: String,
   class: String,
   password: String,
+  email: String,
   marks: {
     type: Map,
     of: Number
