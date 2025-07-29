@@ -11,7 +11,7 @@ const courses = new mongoose.Schema({
     },
     credit : {
         type : Number,
-        require: true
+        required: true
     }
 });
 

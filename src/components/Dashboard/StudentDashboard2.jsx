@@ -29,6 +29,7 @@ const StudentDashboard2 = () => {
         try {
             const res = await axios.get(`http://localhost:3000/api/student/${storedId}`);
             if (res) setStudent(res.data);
+            console.log("Student data fetched:", res.data);
         } catch (err) {
             console.error("Error fetching student data:", err);
         }
@@ -57,29 +58,6 @@ const StudentDashboard2 = () => {
                     <Profile
                         data={student}
                     />
-                    // <div className="bg-white shadow-md rounded-2xl p-6 max-w-4xl mx-auto mt-10 border border-gray-200">
-                    //     <h3 className="text-3xl font-bold text-blue-700 mb-6 text-center underline">
-                    //         Student Profile
-                    //     </h3>
-                    //     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 text-lg text-gray-800 font-medium">
-                    //         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                    //             <p className="text-sm text-gray-500">Name</p>
-                    //             <p>{student.name || 'N/A'}</p>
-                    //         </div>
-                    //         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                    //             <p className="text-sm text-gray-500">Roll No</p>
-                    //             <p>{student.rollNo || 'N/A'}</p>
-                    //         </div>
-                    //         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                    //             <p className="text-sm text-gray-500">Class</p>
-                    //             <p>{student.class || 'N/A'}</p>
-                    //         </div>
-                    //         <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
-                    //             <p className="text-sm text-gray-500">Email</p>
-                    //             <p>{student.email || 'Not Provided'}</p>
-                    //         </div>
-                    //     </div>
-                    // </div>
                 );
             case 'Courses':
                 return (

@@ -2,7 +2,13 @@ import mongoose from 'mongoose';
 
 const student = new mongoose.Schema({
   name: String,
-  rollNo: String,
+  rollNo: {
+    type : String,
+    minlength : 12,
+    maxlength : 12,
+    required : true,
+    unique : true
+  },
   class: String,
   password: String,
   email: String,

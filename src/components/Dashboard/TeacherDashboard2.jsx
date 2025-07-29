@@ -20,9 +20,21 @@ const TeacherDashboard2 = () => {
     const [loading, setLoading] = useState(false);
     const [TeacherProfile, setTeacherProfile] = useState({})
     const userId = sessionStorage.getItem("userId");
+    const [Stats, setStats] = useState()
+
+    const fetchCourseStats = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3000/api/coursesStats/${userId}`);
+            setStats(response.data);
+            console.log("Course Stats:", response.data);
+        } catch (error) {
+            console.error('Error fetching course stats:', error);
+        }
+    };
 
     useEffect(() => {
         fetchprofile();
+        fetchCourseStats();
     }, [])
 
     const fetchprofile = async () => {
@@ -53,9 +65,9 @@ const TeacherDashboard2 = () => {
                 setLoading(false);
                 return;
             }
-            const { data } = await axios.get(`http://localhost:3000/api/student/roll/${rollNo}`);
-            console.log('Fetched student:', data[0]);
-            if (data.length === 0 || !data[0]) {
+            const { data } = await axios.get(`http://localhost:3000/api/student/roll/${rollNo}/${userId}`);
+            console.log('Fetched student:', data);
+            if (!data || Object.keys(data.marks).length === 0) {
                 Toastify({
                     text: "No student found with this roll number",
                     duration: 3000,
@@ -68,7 +80,7 @@ const TeacherDashboard2 = () => {
                 setStudent(null);
                 return;
             }
-            setStudent(data[0]);
+            setStudent(data);
             Toastify({
                 text: "Student fetched successfully",
                 duration: 3000,
@@ -100,7 +112,7 @@ const TeacherDashboard2 = () => {
     const getallstudents = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`http://localhost:3000/api/students`);
+            const { data } = await axios.get(`http://localhost:3000/api/students/${userId}`);
             console.log('Fetched all students:', data);
             setallstudent(data);
         } catch (err) {
@@ -194,11 +206,7 @@ const TeacherDashboard2 = () => {
                     <Home
                         data={{
                             name: TeacherProfile.name,
-                            courses: [
-                                { code: "CS-101", enrolled: 42, averageMarks: 79, status: "Active", },
-                                { code: "DSA-202", enrolled: 38, averageMarks: 85, status: "Active", },
-                                { code: "WEB-303", enrolled: 29, averageMarks: 78, status: "Reviewing", },
-                            ],
+                            courses: Stats
                         }}
                     />
                 );
@@ -236,32 +244,6 @@ const TeacherDashboard2 = () => {
                                     </div>
                                 </div>
                             ))}
-                        </div>
-                    </div>
-                );
-
-            case 'Grades':
-                return (
-                    <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md p-6 border border-gray-100">
-                        <div className="flex items-center justify-between mb-5">
-                            <h2 className="text-xl font-bold text-blue-800 flex items-center gap-2">
-                                <span className="text-2xl">📊</span> Grade Overview
-                            </h2>
-                            <span className="text-sm text-gray-500">Term: Fall 2025</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-blue-50 p-4 rounded-xl shadow-sm border border-blue-100 flex flex-col items-center text-center">
-                                <span className="text-3xl font-bold text-blue-700">3.4</span>
-                                <span className="text-xs mt-1 text-gray-600">Avg GPA</span>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-xl shadow-sm border border-green-100 flex flex-col items-center text-center">
-                                <span className="text-3xl font-bold text-green-600">4.0</span>
-                                <span className="text-xs mt-1 text-gray-600">Top GPA</span>
-                            </div>
-                            <div className="bg-red-50 p-4 rounded-xl shadow-sm border border-red-100 flex flex-col items-center text-center">
-                                <span className="text-3xl font-bold text-red-600">3</span>
-                                <span className="text-xs mt-1 text-gray-600">Failed</span>
-                            </div>
                         </div>
                     </div>
                 );
@@ -353,7 +335,7 @@ const TeacherDashboard2 = () => {
                             {allstudent && (
                                 <div className="mt-4 overflow-x-auto flex flex-col justify-center items-center">
                                     <h3 className="text-lg font-semibold mb-2">All Students</h3>
-                                    <table className="w-full text-sm border border-blue-700 rounded-lg overflow-hidden">
+                                    <table className="w-full text-sx border border-blue-700 rounded-lg overflow-hidden">
                                         <thead>
                                             <tr className="bg-blue-100">
                                                 <th className="p-2 text-left">Roll No</th>

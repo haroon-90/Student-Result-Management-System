@@ -16,8 +16,7 @@ const listItemForRole = {
     { id: 2, name: 'Profile' },
     { id: 3, name: 'Students' },
     { id: 4, name: 'Courses' },
-    { id: 5, name: 'Grades' },
-    { id: 6, name: 'Update password' },
+    { id: 5, name: 'Update password' },
   ],
   admin: [
     { id: 1, name: 'Home' },
@@ -28,7 +27,6 @@ const listItemForRole = {
     { id: 6, name: 'Courses' },
     { id: 7, name: 'Grades' },
     { id: 8, name: 'Update password' },
-
   ],
 };
 
@@ -86,7 +84,7 @@ const Sidebar = () => {
 
           {/* Dropdown list */}
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${showList ? 'max-h-60 mt-2' : 'max-h-0'}`}
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${showList ? 'mt-2' : 'max-h-0'}`}
           >
             <ul className="rounded-md ">
               {filteredList.map((item) => (

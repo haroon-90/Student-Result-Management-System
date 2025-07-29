@@ -14,9 +14,9 @@ import AddCourseForm from '../Parts/AddCourse';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const [AllCourses, setAllCourses] = useState()
     const { role, sidebaritem, setSidebaritem } = useContext(UserContext);
     const [adminProfile, setAdminProfile] = useState({ name: "admin" });
-    const [Courses, setCourses] = useState({});
     const [student, setStudent] = useState({
         name: '',
         rollNo: '',
@@ -24,13 +24,27 @@ const AdminDashboard = () => {
         class: '',
         subjects: [''],
     });
+    const [stats, setStats] = useState({
+        students: 0,
+        teachers: 0,
+        totalClasses: 0,
+        systemStatus: 'Loading...'
+    });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await axios.get('http://localhost:3000/api/stats');
+                setStats(res.data);
+            } catch (error) {
+                console.error("Error loading stats:", error);
+            }
+        };
+
+        fetchStats();
+    }, []);
 
     const inputStyle = "text-sm border border-gray-300 rounded-lg px-2 py-1 w-full focus:border-blue-500 focus:shadow-[0_0_5px_0.5px_rgba(59,130,246,0.5)] focus:outline-none";
-
-    const handleCoursesChange = (e) => {
-        const { name, value } = e.target;
-        setCourses({ ...Courses, [name]: value });
-    };
 
     const disabedSubmit = () => {
         if (!student.name || !student.rollNo || !student.class || student.subjects.some(subj => !subj.trim()))
@@ -53,6 +67,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchprofile();
+        FetchAllCourses();
     }, [])
 
     const fetchprofile = async () => {
@@ -102,6 +117,24 @@ const AdminDashboard = () => {
         }
     };
 
+    const FetchAllCourses = async () => {
+        try {
+            const res = await axios.get('http://localhost:3000/api/courses');
+            if (res) setAllCourses(res.data);
+        } catch (err) {
+            console.error("Error fetching courses:", err);
+            Toastify({
+                text: "Error fetching courses.",
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff4d4f",
+                close: true,
+                stopOnFocus: true,
+            }).showToast();
+        }
+    };
+
     if (role !== 'admin') {
         return <div className="text-center text-red-500 font-semibold">Unauthorized Access</div>;
     }
@@ -111,7 +144,7 @@ const AdminDashboard = () => {
             case '':
             case 'Home':
                 return (
-                    <Home data={adminProfile} />
+                    <Home data={adminProfile} stats={stats} />
                 );
             case 'Add Teacher':
                 return (
@@ -216,7 +249,6 @@ const AdminDashboard = () => {
                             </button>
                         </div>
                     </div>
-
                 );
             case 'Update password':
                 return (
@@ -229,30 +261,36 @@ const AdminDashboard = () => {
                     />
                 );
             case 'Courses':
-                return <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-md">
-                    <h3 className="text-xl font-bold text-blue-600 mb-4">📘 Available Courses</h3>
-                    <ul className="divide-y divide-blue-100">
-                        <li className="py-2">
-                            <p className="font-medium text-gray-800">Mathematics</p>
-                            <p className="text-sm text-gray-500">Class: 10 | Instructor: Mr. Ali</p>
-                        </li>
-                        <li className="py-2">
-                            <p className="font-medium text-gray-800">Physics</p>
-                            <p className="text-sm text-gray-500">Class: 9 | Instructor: Ms. Sana</p>
-                        </li>
-                        <li className="py-2">
-                            <p className="font-medium text-gray-800">Biology</p>
-                            <p className="text-sm text-gray-500">Class: 8 | Instructor: Dr. Ahmed</p>
-                        </li>
-                        <li className="py-2">
-                            <p className="font-medium text-gray-800">Computer Science</p>
-                            <p className="text-sm text-gray-500">Class: 11 | Instructor: Mr. Usman</p>
-                        </li>
-                    </ul>
-                </div>;
+                return <div className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-3xl shadow-sm p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-2xl font-bold text-blue-700 flex items-center gap-2">
+                            📘 Available Courses
+                        </h3>
+                        <span className="text-xs text-gray-400">Total: {AllCourses?.length || 0}</span>
+                    </div>
+
+                    <div className="space-y-3">
+                        {AllCourses && AllCourses.map((course, index) => (
+                            <div
+                                key={index}
+                                className="bg-blue-50 border border-blue-100 rounded-xl p-4 shadow-sm flex justify-between items-center"
+                            >
+                                <div>
+                                    <p className="font-semibold text-blue-800">{course.title}</p>
+                                    <p className="text-xs text-gray-600 mt-1">Code: {course.code}</p>
+                                </div>
+                                <div className="text-sm text-gray-700 bg-blue-200 px-3 py-1 rounded-full font-medium">
+                                    {course.credit} cr
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
             case 'Grades':
                 return <div className="bg-white border border-blue-200 rounded-xl p-6 shadow-md">
-                    <h3 className="text-xl font-bold text-blue-600 mb-4">📊 Grades Summary</h3>
+                    <h1 className='text-center text-xl'>Feature in progress. Please check back later.</h1>
+                    {/* <h3 className="text-xl font-bold text-blue-600 mb-4">📊 Grades Summary</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
 
                         <div className="bg-blue-50 p-4 rounded-lg shadow-sm">
@@ -283,7 +321,7 @@ const AdminDashboard = () => {
                             <li>Ali Raza - GPA: 3.9</li>
                             <li>Sana Tariq - GPA: 3.8</li>
                         </ul>
-                    </div>
+                    </div> */}
                 </div>;
             default:
                 return <p className="text-sm">{sidebaritem} section is under development.</p>;

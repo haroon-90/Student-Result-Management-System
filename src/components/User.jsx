@@ -15,13 +15,12 @@ function User() {
                 <div className="h-20 bg-blue-50 border-b border-gray-300">
                     <Navbar />
                 </div>
-                <div className="flex flex-1"
-                >
+                <div className="flex flex-1">
                     <div className="md:w-1/6 block bg-gray-100 border-r border-gray-300">
                         <Sidebar />
                     </div>
                     <div className="flex-1 flex justify-center">
-                        <Outlet/>
+                        <Outlet />
                     </div>
                 </div>
                 <div className="bg-blue-50 border-t border-gray-300">

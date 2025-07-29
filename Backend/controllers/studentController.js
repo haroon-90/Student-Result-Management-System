@@ -77,55 +77,165 @@ const addStudent = async (req, res) => {
 // Get All Students
 const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find();
-    res.json(students);
+    const id = req.params.userId;
+
+    // Step 1: Find the teacher
+    const teacher = await Teacher.findById(id).lean();
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
+    }
+
+    // Step 2: Get the list of course codes assigned to the teacher
+    const allowedCourseCodes = Object.keys(teacher.courses || {});
+
+    // Step 3: Get all students
+    const allStudents = await Student.find().lean();
+
+    // Step 4: Filter student marks to only include matching courses
+    const filteredStudents = allStudents.map((student) => {
+      const filteredMarks = {};
+
+      for (const code of allowedCourseCodes) {
+        if (student.marks && student.marks[code] !== undefined) {
+          filteredMarks[code] = student.marks[code];
+        }
+      }
+
+      return {
+        ...student,
+        marks: filteredMarks,
+      };
+    });
+
+    // ✅ Step 5: Keep only those students who have at least one relevant mark
+    const finalStudents = filteredStudents.filter(
+      (student) => Object.keys(student.marks).length > 0
+    );
+
+    res.json(finalStudents);
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    console.error("Error in getAllStudents:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 };
+
 
 // Get Single Student by Id
 const getStudentById = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findById(req.params.id).lean();
     if (!student) {
-      return res.status(404).json({ message: "Student not found" })
+      return res.status(404).json({ message: "Student not found" });
     }
-    res.json(student);
+
+    const studentMarks = student.marks || {};
+    console.log("typeof student.marks =>", typeof student.marks);
+
+    const courseCodes = Object.keys(studentMarks);
+    console.log("type of courseCodes", typeof courseCodes)
+    console.log("courseCodes", courseCodes)
+    
+    if (courseCodes.length === 0) {
+      return res.json(student);
+    }
+    
+    const courses = await Course.find({ code: { $in: courseCodes } }).lean(); // 👈 magic line
+    console.log("courses", courses)
+
+    const marksWithTitles = {};
+    courses.forEach(course => {
+      if (studentMarks[course.code] != null) {
+        marksWithTitles[course.title] = studentMarks[course.code];
+      }
+    });
+
+    res.json({
+      ...student,
+      marks: marksWithTitles,
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// Get Single Student bu rollNo
+// Get Single Student by rollNo
 const getStudentByRoll = async (req, res) => {
   try {
-    const student = await Student.find({ rollNo: req.params.roll });
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" })
+    const teacherId = req.params.userId;
+
+    // Step 1: Get the teacher
+    const teacher = await Teacher.findById(teacherId).lean();
+    if (!teacher) {
+      return res.status(404).json({ message: "Teacher not found" });
     }
-    res.json(student);
+
+    const allowedCourseCodes = Object.keys(teacher.courses || {});
+    console.log("Teacher Courses:", teacher.courses);
+    console.log("Allowed Course Codes:", allowedCourseCodes);
+
+    // Step 2: Get the student by roll number
+    const student = await Student.findOne({ rollNo: req.params.roll }).lean();
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    console.log("Student Data:", student);
+    console.log("Student Marks:", student.marks);
+
+    // Step 3: Filter only matching marks
+    const filteredMarks = {};
+    for (const code of allowedCourseCodes) {
+      if (student.marks && student.marks[code] !== undefined) {
+        filteredMarks[code] = student.marks[code];
+      }
+    }
+
+    // Step 4: Send response in same format
+    res.json({
+      ...student,
+      marks: filteredMarks
+    });
+
   } catch (err) {
+    console.error("Error in getStudentByRoll:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
 
 // Update Student (Admin only)
 const updateStudent = async (req, res) => {
-  const { marks } = req.body;
-  const { gpa, grade } = calculateGpaAndGrade(marks);
+  const { marks: incomingMarks } = req.body;
+
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findById(req.params.id).lean(false); // Make sure we get full Mongoose document
+
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
-    const updatedStudent = await Student.findByIdAndUpdate(
-      req.params.id,
-      { marks, gpa, grade },
-      { new: true }
-    );
-    res.json(updatedStudent);
+
+    // Use plain JS object, no internal Mongoose fields
+    const existingMarks = student.marks ? JSON.parse(JSON.stringify(student.marks)) : {};
+
+    // Update only the matched/incoming subjects
+    for (const subject in incomingMarks) {
+      existingMarks[subject] = incomingMarks[subject];
+    }
+
+    // Recalculate GPA & Grade
+    const { gpa, grade } = calculateGpaAndGrade(existingMarks);
+
+    // Assign updated values
+    student.marks = existingMarks;
+    student.gpa = gpa;
+    student.grade = grade;
+
+    await student.save();
+
+    res.json(student);
   } catch (err) {
+    console.error("Update error:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -164,10 +274,10 @@ const getTeacherProfile = async (req, res) => {
     const matchedCourses = await Course.find({ code: { $in: courseCodes } });
 
     res.status(200).json({
-        name: teacher.name,
-        ID: teacher.ID,
-        email: teacher.email,
-        courses: matchedCourses
+      name: teacher.name,
+      ID: teacher.ID,
+      email: teacher.email,
+      courses: matchedCourses
     });
 
   } catch (err) {
@@ -196,6 +306,25 @@ const addTeacher = async (req, res) => {
   }
 };
 
+const total = async (req, res) => {
+  try {
+    const students = await Student.find();
+    const totalStudents = students.length;
+    const totalTeachers = await Teacher.countDocuments();
+    const classSet = new Set(students.map(s => s.class));
+    res.json({
+      students: totalStudents,
+      teachers: totalTeachers,
+      totalClasses: classSet.size,
+      systemStatus: "Operational"
+    })
+  }
+  catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 export {
   loginUser,
   addStudent,
@@ -207,5 +336,6 @@ export {
   getAdminProfile,
   updatePassword,
   getTeacherProfile,
-  addTeacher
+  addTeacher,
+  total
 };

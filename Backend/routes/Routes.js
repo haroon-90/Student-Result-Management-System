@@ -10,9 +10,14 @@ import {
   getAdminProfile,
   updatePassword,
   getTeacherProfile,
-  addTeacher
+  addTeacher,
+  total
 } from '../controllers/studentController.js';
-import { addCourse } from '../controllers/coursesController.js';
+import { 
+  addCourse,
+  getAllCourses,
+  CoursesStats
+ } from '../controllers/coursesController.js';
 
 const router = express.Router();
 
@@ -24,19 +29,22 @@ router.get('/', (req, res)=>{
 router.post('/login', loginUser);
 
 // Student routes
-router.get('/students', getAllStudents); // Admin only
+router.get('/students/:userId', getAllStudents); // Admin only
 router.post('/students', addStudent);    // Admin only
 router.get('/student/:id', getStudentById); // Admin/Student
 router.put('/student/:id/password', updatePassword)
-router.get('/student/roll/:roll', getStudentByRoll); // Admin/Student/teacher
+router.get('/student/roll/:roll/:userId', getStudentByRoll); // Admin/Student/teacher
 router.put('/student/:id', updateStudent); // Admin/teacher
 router.delete('/student/:id', deleteStudent); // Admin only
+router.post('/teacher', addTeacher)
+router.get('/stats', total);
 
 // Profile routes
 router.get('/admin/:id', getAdminProfile)
 router.get('/teacher/:id', getTeacherProfile)
 
 router.post('/courses', addCourse)
-router.post('/teacher', addTeacher)
+router.get('/courses', getAllCourses)
+router.get('/coursesStats/:id', CoursesStats)
 
 export default router;

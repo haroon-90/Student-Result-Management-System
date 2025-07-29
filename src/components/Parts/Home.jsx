@@ -1,5 +1,5 @@
 // Home.jsx
-const Home = ({ data }) => {
+const Home = ({ data, stats }) => {
     const storedRole = sessionStorage.getItem("role");
 
     if (storedRole === "admin") {
@@ -12,22 +12,22 @@ const Home = ({ data }) => {
 
                 <div className="bg-white border border-blue-400 p-4 rounded-lg shadow-sm">
                     <h3 className="text-blue-600 text-lg font-semibold">📚 Total Students</h3>
-                    <p className="text-2xl font-bold mt-2 text-gray-800">128</p>
+                    <p className="text-2xl font-bold mt-2 text-gray-800">{stats.students}</p>
                 </div>
 
                 <div className="bg-white border border-green-400 p-4 rounded-lg shadow-sm">
                     <h3 className="text-green-600 text-lg font-semibold">👨‍🏫 Total Teachers</h3>
-                    <p className="text-2xl font-bold mt-2 text-gray-800">15</p>
+                    <p className="text-2xl font-bold mt-2 text-gray-800">{stats.teachers}</p>
                 </div>
 
                 <div className="bg-white border border-yellow-400 p-4 rounded-lg shadow-sm">
                     <h3 className="text-yellow-600 text-lg font-semibold">🏫 Total Classes</h3>
-                    <p className="text-2xl font-bold mt-2 text-gray-800">8</p>
+                    <p className="text-2xl font-bold mt-2 text-gray-800">{stats.totalClasses}</p>
                 </div>
 
                 <div className="bg-white border border-red-400 p-4 rounded-lg shadow-sm">
                     <h3 className="text-red-600 text-lg font-semibold">🛠 System Status</h3>
-                    <p className="text-2xl font-bold mt-2 text-green-600">Operational</p>
+                    <p className="text-2xl font-bold mt-2 text-green-600">{stats.systemStatus}</p>
                 </div>
             </div>
         );
@@ -45,73 +45,62 @@ const Home = ({ data }) => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
-                        <p className="text-sm text-gray-500">Total Courses</p>
-                        <p className="text-2xl font-bold text-blue-700">
-                            {data?.courses?.length || 0}
-                        </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                    {/* Total Courses */}
+                    <div className="bg-gradient-to-tr from-blue-100 to-blue-50 p-5 rounded-xl shadow border border-blue-200">
+                        <p className="text-sm text-blue-800 font-medium">Total Courses</p>
+                        <p className="text-3xl font-bold text-blue-700 mt-1">{data?.courses?.length || 0}</p>
                     </div>
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 shadow-sm">
-                        <p className="text-sm text-gray-500">Average Marks</p>
-                        <p className="text-2xl font-bold text-green-700">
+
+                    {/* Top Performing Course */}
+                    <div className="col-span-2 bg-gradient-to-tr from-yellow-100 to-yellow-50 p-5 rounded-xl shadow border border-yellow-200">
+                        <p className="text-sm text-yellow-800 font-medium">Top Performing Course</p>
+                        <p className="text-xl font-semibold text-yellow-700 mt-1">
                             {
-                                data?.courses?.length
-                                    ? Math.round(
-                                        data.courses.reduce((acc, c) => acc + c.averageMarks, 0) /
-                                        data.courses.length
-                                    )
-                                    : 0
-                            }
-                            %
-                        </p>
-                    </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm">
-                        <p className="text-sm text-gray-500">Top Performing Course</p>
-                        <p className="text-lg font-semibold text-yellow-700">
-                            {
-                                data?.courses?.length
+                                Array.isArray(data?.courses) && data.courses.length
                                     ? data.courses.reduce((top, current) =>
-                                        current.averageMarks > top.averageMarks ? current : top
+                                        current.enrolled > top.enrolled ? current : top
                                     ).code
                                     : "N/A"
                             }
                         </p>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
-                        <p className="text-sm text-gray-500">Courses Reviewing</p>
-                        <p className="text-2xl font-bold text-red-600">
-                            {data?.courses?.filter(c => c.status === "Reviewing").length || 0}
-                        </p>
-                    </div>
                 </div>
 
-                <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
-                    <table className="min-w-full bg-white text-left text-sm">
-                        <thead className="bg-blue-100 text-blue-800 font-semibold">
+                <div className="mt-8 overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+                    <table className="min-w-full bg-white text-sm text-left">
+                        <thead className="bg-blue-50 text-blue-700 font-semibold">
                             <tr>
-                                <th className="py-3 px-4">Course Code</th>
-                                <th className="py-3 px-4">Students Enrolled</th>
-                                <th className="py-3 px-4">Avg. Marks</th>
-                                <th className="py-3 px-4">Status</th>
+                                <th className="py-3 px-5">Course Code</th>
+                                <th className="py-3 px-5">Students Enrolled</th>
+                                <th className="py-3 px-5">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data?.courses?.map((course, idx) => (
-                                <tr className="border-t" key={idx}>
-                                    <td className="py-3 px-4">{course.code}</td>
-                                    <td className="py-3 px-4">{course.enrolled}</td>
-                                    <td className="py-3 px-4">{course.averageMarks}%</td>
-                                    <td
-                                        className={`py-3 px-4 ${course.status === "Active"
-                                                ? "text-green-600"
-                                                : "text-yellow-600"
-                                            }`}
-                                    >
-                                        {course.status}
-                                    </td>
-                                </tr>
-                            ))}
+                            {
+                                Array.isArray(data?.courses) && data.courses.length > 0
+                                    ? data.courses.map((course, idx) => (
+                                        <tr key={idx} className="border-t hover:bg-gray-50 transition">
+                                            <td className="py-3 px-5 font-medium text-gray-800">{course.code}</td>
+                                            <td className="py-3 px-5">{course.enrolled}</td>
+                                            <td className="py-3 px-5">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                                    ${course.status === "Active"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-yellow-100 text-yellow-700"}`}>
+                                                    {course.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                    : (
+                                        <tr>
+                                            <td colSpan={4} className="text-center text-gray-400 py-6">
+                                                No courses data available.
+                                            </td>
+                                        </tr>
+                                    )
+                            }
                         </tbody>
                     </table>
                 </div>
