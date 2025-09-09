@@ -130,6 +130,7 @@ const TeacherDashboard2 = () => {
                     marks: student.marks,
                 });
             }
+            getallstudents();
             Toastify({
                 text: "Marks updated successfully!",
                 duration: 3000,
@@ -175,6 +176,7 @@ const TeacherDashboard2 = () => {
             await axios.put(`http://localhost:3000/api/student/${student._id}`, {
                 marks: student.marks,
             });
+            fetchStudent();
             Toastify({
                 text: "Marks updated successfully!",
                 duration: 3000,
